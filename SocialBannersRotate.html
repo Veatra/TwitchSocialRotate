@@ -1,10 +1,23 @@
-<!-- 
+<!--
   Social Banner Rotator
-  Container wraps the banner and the relative backing-panel wrapper 
+  Container wraps the banner and the relative backing-panel wrapper
   to allow bounds for precise dimensions and 3D space transforms.
 -->
 <div id="banner-container">
-  <div id="banner-wrapper" style="display: none;">
-      <img id="banner-image" src="" alt="Social Banner">
+  <div id="banner-wrapper" class="theme-midnightGlass" style="display: none;" role="status" aria-live="polite">
+    <div id="generated-banner">
+      <div class="banner-decoration decoration-one"></div>
+      <div class="banner-decoration decoration-two"></div>
+      <div id="platform-logo-shell" aria-hidden="true">
+        <img id="platform-logo" alt="">
+        <span id="platform-logo-fallback"></span>
+      </div>
+      <div id="social-copy">
+        <span id="platform-label"></span>
+        <span id="social-handle"></span>
+      </div>
+      <span id="banner-accent" aria-hidden="true"></span>
+    </div>
+    <img id="banner-image" src="" alt="">
   </div>
 </div>

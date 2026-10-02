@@ -1,9 +1,9 @@
 /**
  * Social Banner Rotator - Controller Logic
- * 
- * Purpose: Manages banner queue sequences, custom legibility card wrappers, 
+ *
+ * Purpose: Manages banner queue sequences, custom legibility card wrappers,
  * CSS dynamic parameter injects, and cross-platform instant chat command triggers.
- * 
+ *
  * Architectural Features:
  * - Dynamic split timing speeds implemented (Intro & Outro have independent configuration) .
  * - Supports granular override ranks: Broadcaster, Moderator, VIP, or Everyone.
@@ -18,11 +18,11 @@ let kickWs = null; // Socket connection tracker
 
 // Global Timing Configuration State
 const WidgetState = {
-    images: [],             // Clean chronological list of uploaded banners
-    activeQueue: [],        // Copy of images currently running (useful for dynamic shuffle)
+    images: [],             // Clean chronological list of generated or uploaded banner records
+    activeQueue: [],        // Copy of banners currently running (useful for dynamic shuffle)
     currentIndex: 0,
     currentTimeoutId: null, // Primary sequence tracking handle
-    
+
     // Config values fetched on Widget load
     displayDurationMs: 5000,
     animInDurationMs: 1000,
@@ -34,21 +34,39 @@ const WidgetState = {
     animInClass: 'slideInLeft',
     animOutClass: 'slideOutRight',
     chatCommand: '!socials',
-    commandPermission: 'broadcaster+mod' // Default fallback setting
+    commandPermission: 'broadcaster+mod', // Default fallback setting
+    activationMode: 'both',
+    bannerTheme: 'midnightGlass',
+    showPlatformLogos: true,
+    previewMode: false
 };
+
+// Platform metadata is kept in code so generated banners need no external artwork.
+// Simple Icons supplies compact SVGs; a readable initial remains if its CDN is unavailable.
+const SocialPlatforms = [
+    { key: 'twitch', label: 'Twitch', color: '#9146FF', rgb: '145,70,255', icon: 'twitch' },
+    { key: 'discord', label: 'Discord', color: '#5865F2', rgb: '88,101,242', icon: 'discord' },
+    { key: 'youtube', label: 'YouTube', color: '#FF0033', rgb: '255,0,51', icon: 'youtube' },
+    { key: 'twitter', label: 'X / Twitter', color: '#1D9BF0', rgb: '29,155,240', icon: 'x' },
+    { key: 'kick', label: 'Kick', color: '#53FC18', rgb: '83,252,24', icon: 'kick' },
+    { key: 'tiktok', label: 'TikTok', color: '#FE2C55', rgb: '254,44,85', icon: 'tiktok' },
+    { key: 'patreon', label: 'Patreon', color: '#FF424D', rgb: '255,66,77', icon: 'patreon' },
+    { key: 'instagram', label: 'Instagram', color: '#D62976', rgb: '214,41,118', icon: 'instagram' },
+    { key: 'bluesky', label: 'Bluesky', color: '#1185FE', rgb: '17,133,254', icon: 'bluesky' }
+];
 
 // --- Core Helper Functions & Resolvers ---
 
 /**
  * Attempts to automatically resolve a Kick channel name into a numerical Chatroom ID via API.
  * Contains safeguards against Cloudflare blocks when run from browser sources.
- * 
+ *
  * @param {string} input - The user's input (can be "username" or "1234567").
  * @returns {Promise<string|null>} - The numerical ID as a string, or null if failed.
  */
 async function resolveKickChatroomId(input) {
     const cleanInput = input.trim();
-    
+
     // If it's already a clean number, skip the API call.
     if (/^\d+$/.test(cleanInput)) {
         console.log(`[Social Rotator] Kick ID Input "${cleanInput}" is purely numeric. Bypassing API fetch.`);
@@ -56,14 +74,14 @@ async function resolveKickChatroomId(input) {
     }
 
     console.log(`[Social Rotator] Kick Input "${cleanInput}" appears to be a username. Attempting to fetch Chatroom ID via Kick API...`);
-    
+
     try {
         const response = await fetch(`https://kick.com/api/v2/channels/${cleanInput}`);
         if (!response.ok) {
             throw new Error(`HTTP Error ${response.status}: API denied the request.`);
         }
         const data = await response.json();
-        
+
         if (data && data.chatroom && data.chatroom.id) {
             const fetchedId = data.chatroom.id.toString();
             console.log(`[Social Rotator] SUCCESS: Resolved Kick username "${cleanInput}" to Chatroom ID: ${fetchedId}`);
@@ -82,16 +100,16 @@ async function resolveKickChatroomId(input) {
  * Connects directly to Kick's Chat WebSocket (Pusher) without needing third-party bots.
  * Normalizes incoming Kick messages to perfectly match the StreamElements data structure,
  * allowing the existing command logic to process them flawlessly.
- * 
+ *
  * @param {string} chatroomId - The channel's resolved Kick Chatroom ID.
  */
 function connectKickChat(chatroomId) {
     if (!chatroomId) return;
 
     // Modern Kick public Pusher App Key
-    const kickPusherKey = "32cbd69e4b950bf97679"; 
+    const kickPusherKey = "32cbd69e4b950bf97679";
     const wsUrl = `wss://ws-us2.pusher.com/app/${kickPusherKey}?protocol=7&client=js&version=8.4.0&flash=false`;
-    
+
     console.log(`[Social Rotator] Initializing WebSocket connection to Kick: ${wsUrl}`);
     kickWs = new WebSocket(wsUrl);
 
@@ -103,7 +121,7 @@ function connectKickChat(chatroomId) {
         try {
             const payload = JSON.parse(event.data);
             const eventType = payload.event || "";
-            
+
             // Pusher Heartbeats
             if (eventType === "pusher:ping") {
                 if (kickWs.readyState === WebSocket.OPEN) {
@@ -126,11 +144,11 @@ function connectKickChat(chatroomId) {
                 console.log(`[Social Rotator] SUCCESS: Subscribed to Kick chat stream. Native Cross-Platform Chat is active!`);
                 return;
             }
-            
+
             // Message Processing
             if (eventType.includes("ChatMessage") || eventType.includes("Message")) {
                 let innerData = payload.data;
-                
+
                 // Unpack double-stringified payloads
                 if (typeof innerData === 'string') {
                     try {
@@ -173,10 +191,10 @@ function connectKickChat(chatroomId) {
                     userId: senderId,
                     nick: senderName,
                     displayName: senderName,
-                    tags: {}, 
+                    tags: {},
                     badges: []
                 };
-                
+
                 // Translate Kick badges to corresponding roles
                 badgesArray.forEach(badge => {
                     if (badge.type === 'broadcaster' || badge.type === 'creator') {
@@ -201,7 +219,7 @@ function connectKickChat(chatroomId) {
         console.warn("[Social Rotator] Kick WebSocket disconnected. Attempting to reconnect in 6 seconds...");
         setTimeout(() => connectKickChat(chatroomId), 6000);
     };
-    
+
     kickWs.onerror = (err) => {
         console.error("[Social Rotator] Kick WebSocket encountered an error:", err);
     };
@@ -214,7 +232,7 @@ function connectKickChat(chatroomId) {
 window.addEventListener('onWidgetLoad', async function (obj) {
     try {
         fieldData = obj.detail.fieldData;
-        
+
         // --- Initiate Native Kick Connection ---
         if (fieldData.kickChatroomId && fieldData.kickChatroomId.trim() !== '') {
             const resolvedId = await resolveKickChatroomId(fieldData.kickChatroomId);
@@ -235,6 +253,14 @@ window.addEventListener('onWidgetLoad', async function (obj) {
         WidgetState.animOutDurationMs = (fieldData.animOutDuration !== undefined ? parseFloat(fieldData.animOutDuration) : 1.0) * 1000;
 
         WidgetState.randomizeOrder = fieldData.randomizeOrder === true;
+        WidgetState.activationMode = fieldData.activationMode || 'both';
+        WidgetState.bannerTheme = fieldData.bannerTheme || 'midnightGlass';
+        WidgetState.showPlatformLogos = fieldData.showPlatformLogos !== false;
+
+        const width = Math.max(360, Math.min(1200, Number(fieldData.bannerWidth) || 760));
+        const height = Math.max(110, Math.min(400, Number(fieldData.bannerHeight) || 178));
+        document.documentElement.style.setProperty('--banner-width', `${width}px`);
+        document.documentElement.style.setProperty('--banner-height', `${height}px`);
 
         // Visual Fit & Image Settings
         WidgetState.imageFit = fieldData.imageFit || 'contain';
@@ -252,7 +278,7 @@ window.addEventListener('onWidgetLoad', async function (obj) {
             const blur = fieldData.shadowBlur !== undefined ? fieldData.shadowBlur : 15;
             const offsetX = fieldData.shadowOffsetX !== undefined ? fieldData.shadowOffsetX : 0;
             const offsetY = fieldData.shadowOffsetY !== undefined ? fieldData.shadowOffsetY : 8;
-            
+
             const filterStr = `drop-shadow(${offsetX}px ${offsetY}px ${blur}px ${color})`;
             document.documentElement.style.setProperty('--shadow-filter', filterStr);
         } else {
@@ -278,21 +304,28 @@ window.addEventListener('onWidgetLoad', async function (obj) {
             document.documentElement.style.setProperty('--backing-shadow', 'none');
         }
 
-        // Dynamically fetch non-empty banner fields (up to 12 slots)
+        // Build either an uploaded-art queue or a generated social-profile queue.
         WidgetState.images = [];
-        for (let i = 1; i <= 12; i++) {
-            const imgUrl = fieldData[`image${i}`];
-            if (imgUrl && typeof imgUrl === 'string' && imgUrl.trim() !== '') {
-                WidgetState.images.push(imgUrl);
+        if (WidgetState.bannerTheme === 'uploaded') {
+            for (let i = 1; i <= 12; i++) {
+                const imgUrl = fieldData[`image${i}`];
+                if (imgUrl && typeof imgUrl === 'string' && imgUrl.trim() !== '') {
+                    WidgetState.images.push({ type: 'image', url: imgUrl.trim(), label: `Social banner ${i}` });
+                }
             }
+        } else {
+            SocialPlatforms.forEach(platform => {
+                const handle = String(fieldData[`${platform.key}Handle`] || '').trim();
+                if (handle) WidgetState.images.push({ type: 'generated', handle, platform });
+            });
         }
 
         console.log(`[Social Rotator] Initialization success. Detected ${WidgetState.images.length} banners.`);
 
-        if (WidgetState.images.length > 0) {
+        if (WidgetState.images.length > 0 && WidgetState.activationMode !== 'command') {
             startSequence();
         } else {
-            console.warn('[Social Rotator] No images uploaded. Please configure settings to display assets.');
+            console.log('[Social Rotator] Waiting for a command/preview, or for banner content to be configured.');
         }
 
     } catch (err) {
@@ -303,7 +336,7 @@ window.addEventListener('onWidgetLoad', async function (obj) {
 /**
  * Checks if the message sender holds the required permission level.
  * Robustly parses badges array and fallback Twitch tags.
- * 
+ *
  * @param {Object} eventData - StreamElements event data payload.
  * @returns {boolean} - True if user meets the rank requirements, false otherwise.
  */
@@ -317,22 +350,22 @@ function checkUserPermission(eventData) {
 
     const badges = eventData.badges || [];
     const badgeTypes = Array.isArray(badges) ? badges.map(b => (b && typeof b === 'object') ? b.type : b) : [];
-    
+
     // Extrapolate fallback tags in case browser rendering skips standard formatting
     const tags = eventData.tags || {};
     const rawBadgesStr = tags.badges || '';
 
     // Verify Rank States
-    const isBroadcaster = badgeTypes.includes('broadcaster') || 
-                          tags.broadcaster === '1' || 
+    const isBroadcaster = badgeTypes.includes('broadcaster') ||
+                          tags.broadcaster === '1' ||
                           rawBadgesStr.includes('broadcaster');
 
-    const isModerator = badgeTypes.includes('moderator') || 
-                        tags.mod === '1' || 
+    const isModerator = badgeTypes.includes('moderator') ||
+                        tags.mod === '1' ||
                         rawBadgesStr.includes('moderator');
 
-    const isVip = badgeTypes.includes('vip') || 
-                  tags.vip === '1' || 
+    const isVip = badgeTypes.includes('vip') ||
+                  tags.vip === '1' ||
                   rawBadgesStr.includes('vip');
 
     // Permission Evaluation Hierarchy
@@ -352,14 +385,14 @@ function checkUserPermission(eventData) {
 /**
  * Unified evaluator for message events across all integrated stream chats (Twitch, Kick, YouTube).
  * Checks triggers and permissions to decide whether to override current state.
- * 
+ *
  * @param {Object} eventData - Normalized messaging details.
  */
 function processIncomingMessage(eventData) {
-    if (!WidgetState.chatCommand) return; // Command disabled
+    if (!WidgetState.chatCommand || WidgetState.activationMode === 'auto') return; // Command disabled
 
     const userMessage = (eventData.text || '').trim().toLowerCase();
-    
+
     if (userMessage === WidgetState.chatCommand) {
         // Assert user command rank clearance
         if (checkUserPermission(eventData)) {
@@ -379,6 +412,9 @@ window.addEventListener('onEventReceived', function (obj) {
         const listener = obj.detail.listener;
         if (listener === 'message') {
             processIncomingMessage(obj.detail.event.data);
+        } else if (listener === 'widget-button') {
+            const buttonName = obj.detail.event && (obj.detail.event.field || obj.detail.event.name);
+            if (buttonName === 'previewNext') previewNextBanner();
         }
     } catch (err) {
         console.error('[Social Rotator] Event process error:', err);
@@ -401,7 +437,7 @@ function shuffleArray(array) {
 }
 
 /**
- * Instantly shuts down runtime sequences, cancels timeouts, and rebuilds 
+ * Instantly shuts down runtime sequences, cancels timeouts, and rebuilds
  * the rotation loop starting from index 0.
  */
 function triggerOverrideSequence() {
@@ -411,20 +447,31 @@ function triggerOverrideSequence() {
 
     const wrapperEl = document.getElementById('banner-wrapper');
     const imgEl = document.getElementById('banner-image');
-    
+
     // Instantly hide and clear animations to prevent overlapping
     wrapperEl.style.display = 'none';
     wrapperEl.className = '';
     imgEl.src = '';
-    
+
     // Reset loop index and start instantly
     startSequence();
+}
+
+/** Shows exactly one subsequent banner from the editor's Preview Next button. */
+function previewNextBanner() {
+    if (!WidgetState.images.length) return;
+    if (WidgetState.currentTimeoutId) clearTimeout(WidgetState.currentTimeoutId);
+    if (!WidgetState.activeQueue.length) WidgetState.activeQueue = [...WidgetState.images];
+    else WidgetState.currentIndex = (WidgetState.currentIndex + 1) % WidgetState.activeQueue.length;
+    WidgetState.previewMode = true;
+    showBanner();
 }
 
 /**
  * Begins loop sequence. Prepares arrays (handling randomize states).
  */
 function startSequence() {
+    WidgetState.previewMode = false;
     WidgetState.currentIndex = 0;
 
     if (WidgetState.randomizeOrder) {
@@ -443,17 +490,48 @@ function startSequence() {
 function showBanner() {
     const wrapperEl = document.getElementById('banner-wrapper');
     const imgEl = document.getElementById('banner-image');
-    const activeUrl = WidgetState.activeQueue[WidgetState.currentIndex];
+    const activeBanner = WidgetState.activeQueue[WidgetState.currentIndex];
+    const generatedEl = document.getElementById('generated-banner');
+    const logoShellEl = document.getElementById('platform-logo-shell');
+    const logoEl = document.getElementById('platform-logo');
+    const fallbackEl = document.getElementById('platform-logo-fallback');
 
-    // Inject Image Source
-    imgEl.src = activeUrl;
+    // Inject either uploaded artwork or a responsive generated platform card.
+    if (activeBanner.type === 'image') {
+        generatedEl.style.display = 'none';
+        imgEl.style.display = 'block';
+        imgEl.src = activeBanner.url;
+        imgEl.alt = activeBanner.label;
+    } else {
+        const platform = activeBanner.platform;
+        imgEl.style.display = 'none';
+        imgEl.removeAttribute('src');
+        generatedEl.style.display = 'grid';
+        wrapperEl.className = `theme-${WidgetState.bannerTheme}`;
+        wrapperEl.style.setProperty('--platform-color', platform.color);
+        wrapperEl.style.setProperty('--platform-color-rgb', platform.rgb);
+        document.getElementById('platform-label').textContent = platform.label;
+        const handleEl = document.getElementById('social-handle');
+        handleEl.textContent = activeBanner.handle;
+        // Length-aware ceiling keeps typical handles on one line and reserves wrapping
+        // for genuinely long labels, without making short names look undersized.
+        const handleLength = Array.from(activeBanner.handle).length;
+        const fittedSize = handleLength > 36 ? 24 : handleLength > 28 ? 29 : handleLength > 20 ? 36 : 46;
+        handleEl.style.fontSize = `clamp(22px, 5.2vw, ${fittedSize}px)`;
+        logoShellEl.style.display = WidgetState.showPlatformLogos ? 'grid' : 'none';
+        fallbackEl.textContent = platform.label.charAt(0);
+        fallbackEl.style.display = 'none';
+        logoEl.style.display = 'block';
+        logoEl.src = `https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/${platform.icon}.svg`;
+        logoEl.onerror = () => { logoEl.style.display = 'none'; fallbackEl.style.display = 'block'; };
+    }
 
     // Show wrapper wrapper (using inline-block so it wraps visual dimensions tightly)
     wrapperEl.style.display = 'inline-block';
 
     // Clear animations & trigger repaint to force recalculation of keyframes
-    wrapperEl.className = '';
-    void wrapperEl.offsetWidth; 
+    wrapperEl.classList.remove('animated', WidgetState.animInClass, WidgetState.animOutClass);
+    void wrapperEl.offsetWidth;
 
     // Inject unique Intro Speed directly into styling properties [1]
     wrapperEl.style.setProperty('--animation-duration', `${WidgetState.animInDurationMs / 1000}s`);
@@ -463,21 +541,21 @@ function showBanner() {
 
     // Schedule exit transition: Intro Animation duration + user-defined display delay
     const totalDisplayDelayMs = WidgetState.animInDurationMs + WidgetState.displayDurationMs;
-    
+
     WidgetState.currentTimeoutId = setTimeout(() => {
         hideBanner();
     }, totalDisplayDelayMs);
 }
 
 /**
- * Runs exit transformations and queues up either the next banner element 
+ * Runs exit transformations and queues up either the next banner element
  * or initiates the cycle-wide cooldown pause.
  */
 function hideBanner() {
     const wrapperEl = document.getElementById('banner-wrapper');
 
     // Reset standard and apply the defined exit class to wrapper
-    wrapperEl.className = '';
+    wrapperEl.classList.remove('animated', WidgetState.animInClass, WidgetState.animOutClass);
     void wrapperEl.offsetWidth;
 
     // Inject unique Outro Speed directly into styling properties [1]
@@ -488,8 +566,12 @@ function hideBanner() {
 
     // Wait for exit animation completion
     WidgetState.currentTimeoutId = setTimeout(() => {
-        
+
         wrapperEl.style.display = 'none';
+        if (WidgetState.previewMode) {
+            WidgetState.currentTimeoutId = null;
+            return;
+        }
         WidgetState.currentIndex++;
 
         if (WidgetState.currentIndex < WidgetState.activeQueue.length) {
@@ -498,6 +580,13 @@ function hideBanner() {
                 showBanner();
             }, WidgetState.interBannerGapMs);
         } else {
+            // Command-only mode displays one complete rotation and then stays hidden.
+            if (WidgetState.activationMode === 'command') {
+                WidgetState.currentTimeoutId = null;
+                console.log('[Social Rotator] Command-triggered cycle complete. Waiting for the next command.');
+                return;
+            }
+
             // Completed rotation loop. Start cooldown duration before next full cycle.
             console.log(`[Social Rotator] Completed cycle. Resting for ${WidgetState.pauseDurationMs / 1000}s...`);
             WidgetState.currentTimeoutId = setTimeout(() => {

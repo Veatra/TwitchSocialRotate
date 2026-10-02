@@ -1,7 +1,7 @@
 /*
   Social Banner Rotator - Styling & Animation Definitions
   Includes 13 unique dynamic transition animations (In & Out pairs).
-  Optimized with CSS variables to handle scaling modes, split animation timings, 
+  Optimized with CSS variables to handle scaling modes, split animation timings,
   and the dynamic backing card layout.
 */
 
@@ -13,6 +13,10 @@
     --backing-radius: 0px;
     --backing-padding: 0px;
     --backing-shadow: none;
+    --platform-color: #9146ff;
+    --platform-color-rgb: 145, 70, 255;
+    --banner-width: 760px;
+    --banner-height: 178px;
 }
 
 body {
@@ -30,8 +34,8 @@ body {
     perspective: 1200px; /* Enhanced for complex 3D perspective animations like Fold and Flip */
 }
 
-/* 
-  Inline-block ensures the parent container matches the exact rendered bounding 
+/*
+  Inline-block ensures the parent container matches the exact rendered bounding
   box of the scaled banner. This forces the backing panel styles to sit perfectly flush.
 */
 #banner-wrapper {
@@ -47,6 +51,9 @@ body {
     border-radius: var(--backing-radius);
     padding: var(--backing-padding);
     box-shadow: var(--backing-shadow);
+    width: min(var(--banner-width), 92vw);
+    height: min(var(--banner-height), 82vh);
+    isolation: isolate;
 }
 
 #banner-image {
@@ -55,9 +62,109 @@ body {
     max-height: 100%;
     object-fit: var(--image-fit);
     will-change: transform, opacity, filter;
-    
+
     /* Using drop-shadow filter to wrap perfectly around PNG transparent edges */
-    filter: var(--shadow-filter); 
+    filter: var(--shadow-filter);
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+}
+
+/* =========================================
+   GENERATED SOCIAL BANNERS
+   Eight restrained themes share this responsive content grid. Uploaded images
+   remain available and use the same animation/controller pipeline.
+========================================= */
+#generated-banner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(14px, 3vw, 28px);
+    padding: clamp(18px, 4vw, 34px);
+    overflow: hidden;
+    box-sizing: border-box;
+    border-radius: 28px;
+    color: #fff;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    filter: var(--shadow-filter);
+}
+
+#platform-logo-shell {
+    position: relative;
+    z-index: 2;
+    width: clamp(64px, 12vw, 94px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    flex: none;
+    border-radius: 24px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.24);
+    box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    backdrop-filter: blur(8px);
+}
+#platform-logo { width: 56%; height: 56%; object-fit: contain; filter: brightness(0) invert(1); }
+#platform-logo-fallback { display: none; font-weight: 900; font-size: 34px; }
+#social-copy { position: relative; z-index: 2; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+#platform-label { font-size: clamp(13px, 2.3vw, 18px); font-weight: 750; letter-spacing: .16em; text-transform: uppercase; opacity: .78; }
+#social-handle {
+    max-width: 100%;
+    font-size: clamp(22px, 5.2vw, 46px);
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -.025em;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+    text-shadow: 0 2px 12px rgba(0,0,0,.42);
+}
+#banner-accent { position: relative; z-index: 2; width: 8px; height: 72%; border-radius: 8px; background: var(--platform-color); box-shadow: 0 0 24px rgba(var(--platform-color-rgb),.72); }
+.banner-decoration { position: absolute; pointer-events: none; }
+
+/* 1. Midnight Glass — polished neutral, suitable over almost any game. */
+.theme-midnightGlass #generated-banner { background: linear-gradient(125deg,#090d18 5%,#182238 58%,#0b101d); border: 1px solid rgba(255,255,255,.15); box-shadow: inset 0 1px rgba(255,255,255,.1); }
+.theme-midnightGlass .decoration-one { inset: -80% 40% 25% -15%; background: radial-gradient(circle,rgba(var(--platform-color-rgb),.36),transparent 64%); }
+.theme-midnightGlass .decoration-two { right: 10%; bottom: -80%; width: 40%; height: 150%; background: radial-gradient(circle,rgba(255,255,255,.1),transparent 65%); }
+
+/* 2. Clean Frost — bright neutral with automatic dark copy. */
+.theme-cleanFrost #generated-banner { color:#111827; background: linear-gradient(130deg,rgba(255,255,255,.97),rgba(232,238,247,.95)); border: 1px solid rgba(17,24,39,.12); box-shadow: inset 0 1px #fff; }
+.theme-cleanFrost #social-handle { text-shadow: 0 2px 8px rgba(255,255,255,.7); }
+.theme-cleanFrost #platform-logo-shell { background:var(--platform-color); border-color:rgba(0,0,0,.08); }
+.theme-cleanFrost .decoration-one { inset:0 0 0 72%; background:linear-gradient(135deg,transparent,rgba(var(--platform-color-rgb),.18)); transform:skewX(-14deg); }
+
+/* 3. Platform Pulse — platform color is the hero, tempered by a dark veil. */
+.theme-platformPulse #generated-banner { background: linear-gradient(110deg,var(--platform-color),#10131d 72%); border: 1px solid rgba(255,255,255,.18); }
+.theme-platformPulse .decoration-one { left:24%; top:-100%; width:38%; height:260%; border:1px solid rgba(255,255,255,.18); transform:rotate(22deg); }
+
+/* 4. Neon Edge — vivid without filling the full card with saturated color. */
+.theme-neonEdge #generated-banner { background:#080a0f; border:2px solid var(--platform-color); box-shadow:inset 0 0 30px rgba(var(--platform-color-rgb),.12),0 0 18px rgba(var(--platform-color-rgb),.25); }
+.theme-neonEdge #platform-logo-shell { box-shadow:0 0 22px rgba(var(--platform-color-rgb),.5); }
+.theme-neonEdge .decoration-one { inset:auto 12% 0 12%; height:2px; background:linear-gradient(90deg,transparent,var(--platform-color),transparent); }
+
+/* 5. Soft Aurora — modern neutral gradients with a restrained platform tint. */
+.theme-softAurora #generated-banner { background:linear-gradient(120deg,#15172c,#24314b 45%,#172430); border:1px solid rgba(255,255,255,.16); }
+.theme-softAurora .decoration-one { width:65%; height:180%; left:-8%; top:-70%; background:radial-gradient(ellipse,rgba(var(--platform-color-rgb),.5),transparent 64%); filter:blur(12px); }
+.theme-softAurora .decoration-two { width:55%; height:140%; right:-8%; bottom:-80%; background:radial-gradient(ellipse,rgba(73,220,208,.26),transparent 62%); }
+
+/* 6. Spectrum Ribbon — social-first color movement kept behind a dark reading area. */
+.theme-spectrumRibbon #generated-banner { background:linear-gradient(105deg,#111521 0 67%,var(--platform-color) 67% 100%); border:1px solid rgba(255,255,255,.14); }
+.theme-spectrumRibbon .decoration-one { right:17%; width:10%; height:180%; background:rgba(255,255,255,.13); transform:rotate(16deg); }
+
+/* 7. Paper Cut — friendly layered geometry, still broadcast-safe. */
+.theme-paperCut #generated-banner { background:#202534; border-radius:18px 36px 18px 36px; border:1px solid rgba(255,255,255,.16); }
+.theme-paperCut .decoration-one { inset:10px; border:2px solid rgba(255,255,255,.08); border-radius:13px 29px 13px 29px; }
+.theme-paperCut .decoration-two { right:-50px; top:-70px; width:190px; height:190px; border-radius:50%; background:var(--platform-color); opacity:.32; }
+
+/* 8. Broadcast Bar — compact newsroom-inspired neutral. */
+.theme-broadcastBar #generated-banner { background:linear-gradient(90deg,#07090d,#161a21); border-radius:10px; border-left:10px solid var(--platform-color); }
+.theme-broadcastBar #platform-logo-shell { border-radius:10px; background:transparent; box-shadow:none; }
+.theme-broadcastBar #banner-accent { width:52px; height:6px; align-self:end; margin-bottom:8px; }
+
+@media (max-width: 440px) {
+    #generated-banner { grid-template-columns:auto minmax(0,1fr); }
+    #banner-accent { display:none; }
 }
 
 /* Base class mapped and calculated by JS controller */
