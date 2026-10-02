@@ -1,0 +1,2 @@
+# TwitchSocialRotate
+Rotate social banners
