@@ -1,0 +1,238 @@
+{
+  "chatCommand": {
+    "type": "text",
+    "label": "Chat Command to Trigger (leave empty to disable)",
+    "value": "!socials"
+  },
+  "commandPermission": {
+    "type": "dropdown",
+    "label": "Command Permissions Required",
+    "value": "broadcaster+mod",
+    "options": {
+      "broadcaster": "Broadcaster Only",
+      "broadcaster+mod": "Broadcaster + Moderator",
+      "broadcaster+mod+vip": "Broadcaster + Mod + VIP",
+      "everyone": "Everyone"
+    }
+  },
+  "kickChatroomId": {
+    "type": "text",
+    "label": "Kick Channel Username or Chatroom ID (leave empty to disable)",
+    "value": ""
+  },
+  "displayDuration": {
+    "type": "number",
+    "label": "Show Banner Duration (seconds)",
+    "value": 5,
+    "min": 1,
+    "max": 60,
+    "step": 1
+  },
+  "pauseDuration": {
+    "type": "number",
+    "label": "Pause Before Repeating Cycle (seconds)",
+    "value": 60,
+    "min": 0,
+    "max": 3600,
+    "step": 1
+  },
+  "interBannerGap": {
+    "type": "slider",
+    "label": "Delay Between Banners (seconds)",
+    "value": 0.5,
+    "min": 0.0,
+    "max": 10.0,
+    "step": 0.1
+  },
+  "animIn": {
+    "type": "dropdown",
+    "label": "Intro Animation Type",
+    "value": "slideInLeft",
+    "options": {
+      "fadeIn": "1. Fade In",
+      "slideInLeft": "2. Slide In Left",
+      "slideInRight": "3. Slide In Right",
+      "slideInUp": "4. Slide In Up",
+      "slideInDown": "5. Slide In Down",
+      "bounceIn": "6. Bounce In",
+      "zoomIn": "7. Zoom In",
+      "flipInX": "8. Flip In X (Horizontal)",
+      "flipInY": "9. Flip In Y (Vertical)",
+      "blurZoomIn": "10. Blur Zoom In",
+      "warpSlideRightIn": "11. Warp Slide Right In",
+      "warpSlideLeftIn": "12. Warp Slide Left In",
+      "foldIn3D": "13. 3D Fold In"
+    }
+  },
+  "animInDuration": {
+    "type": "slider",
+    "label": "Intro Animation Speed (seconds)",
+    "value": 1.0,
+    "min": 0.2,
+    "max": 5.0,
+    "step": 0.1
+  },
+  "animOut": {
+    "type": "dropdown",
+    "label": "Outro Animation Type",
+    "value": "slideOutRight",
+    "options": {
+      "fadeOut": "1. Fade Out",
+      "slideOutLeft": "2. Slide Out Left",
+      "slideOutRight": "3. Slide Out Right",
+      "slideOutUp": "4. Slide Out Up",
+      "slideOutDown": "5. Slide Out Down",
+      "bounceOut": "6. Bounce Out",
+      "zoomOut": "7. Zoom Out",
+      "flipOutX": "8. Flip Out X (Horizontal)",
+      "flipOutY": "9. Flip Out Y (Vertical)",
+      "blurZoomOut": "10. Blur Zoom Out",
+      "warpSlideRightOut": "11. Warp Slide Right Out",
+      "warpSlideLeftOut": "12. Warp Slide Left Out",
+      "foldOut3D": "13. 3D Fold Out"
+    }
+  },
+  "animOutDuration": {
+    "type": "slider",
+    "label": "Outro Animation Speed (seconds)",
+    "value": 1.0,
+    "min": 0.2,
+    "max": 5.0,
+    "step": 0.1
+  },
+  "enableShadow": {
+    "type": "checkbox",
+    "label": "Enable Dynamic Graphic Shadows",
+    "value": false
+  },
+  "shadowColor": {
+    "type": "colorpicker",
+    "label": "Shadow Color",
+    "value": "rgba(0, 0, 0, 0.5)"
+  },
+  "shadowBlur": {
+    "type": "slider",
+    "label": "Shadow Blur Radius (px)",
+    "value": 15,
+    "min": 0,
+    "max": 50,
+    "step": 1
+  },
+  "shadowOffsetX": {
+    "type": "slider",
+    "label": "Shadow Shift Horizontal (px)",
+    "value": 0,
+    "min": -50,
+    "max": 50,
+    "step": 1
+  },
+  "shadowOffsetY": {
+    "type": "slider",
+    "label": "Shadow Shift Vertical (px)",
+    "value": 8,
+    "min": -50,
+    "max": 50,
+    "step": 1
+  },
+  "enableBackingCard": {
+    "type": "checkbox",
+    "label": "Enable Legibility Backing Panel",
+    "value": false
+  },
+  "backingColor": {
+    "type": "colorpicker",
+    "label": "Backing Panel Background",
+    "value": "rgba(0, 0, 0, 0.4)"
+  },
+  "backingBorderRadius": {
+    "type": "slider",
+    "label": "Backing Panel Border Radius (px)",
+    "value": 15,
+    "min": 0,
+    "max": 50,
+    "step": 1
+  },
+  "backingPadding": {
+    "type": "slider",
+    "label": "Backing Panel Padding (px)",
+    "value": 20,
+    "min": 0,
+    "max": 100,
+    "step": 1
+  },
+  "backingGlowColor": {
+    "type": "colorpicker",
+    "label": "Backing Glow Color (Ambient Glow)",
+    "value": "rgba(0, 0, 0, 0.2)"
+  },
+  "backingGlowBlur": {
+    "type": "slider",
+    "label": "Backing Glow Blur Radius (px)",
+    "value": 30,
+    "min": 0,
+    "max": 100,
+    "step": 1
+  },
+  "imageFit": {
+    "type": "dropdown",
+    "label": "Image Scaling Mode",
+    "value": "contain",
+    "options": {
+      "contain": "Contain (Keep aspect ratio)",
+      "cover": "Cover (Crop & fill area)"
+    }
+  },
+  "randomizeOrder": {
+    "type": "checkbox",
+    "label": "Randomize Banner Order",
+    "value": false
+  },
+  "image1": {
+    "type": "image-input",
+    "label": "Banner 1"
+  },
+  "image2": {
+    "type": "image-input",
+    "label": "Banner 2"
+  },
+  "image3": {
+    "type": "image-input",
+    "label": "Banner 3"
+  },
+  "image4": {
+    "type": "image-input",
+    "label": "Banner 4"
+  },
+  "image5": {
+    "type": "image-input",
+    "label": "Banner 5"
+  },
+  "image6": {
+    "type": "image-input",
+    "label": "Banner 6"
+  },
+  "image7": {
+    "type": "image-input",
+    "label": "Banner 7"
+  },
+  "image8": {
+    "type": "image-input",
+    "label": "Banner 8"
+  },
+  "image9": {
+    "type": "image-input",
+    "label": "Banner 9"
+  },
+  "image10": {
+    "type": "image-input",
+    "label": "Banner 10"
+  },
+  "image11": {
+    "type": "image-input",
+    "label": "Banner 11"
+  },
+  "image12": {
+    "type": "image-input",
+    "label": "Banner 12"
+  }
+}

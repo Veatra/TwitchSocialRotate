@@ -1,0 +1,280 @@
+/*
+  Social Banner Rotator - Styling & Animation Definitions
+  Includes 13 unique dynamic transition animations (In & Out pairs).
+  Optimized with CSS variables to handle scaling modes, split animation timings, 
+  and the dynamic backing card layout.
+*/
+
+:root {
+    --animation-duration: 1s; /* Overridden dynamically per state by JS */
+    --image-fit: contain;
+    --shadow-filter: none;
+    --backing-color: transparent;
+    --backing-radius: 0px;
+    --backing-padding: 0px;
+    --backing-shadow: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent scrollbars during extreme transformations */
+}
+
+#banner-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1200px; /* Enhanced for complex 3D perspective animations like Fold and Flip */
+}
+
+/* 
+  Inline-block ensures the parent container matches the exact rendered bounding 
+  box of the scaled banner. This forces the backing panel styles to sit perfectly flush.
+*/
+#banner-wrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 95%;
+    max-height: 95%;
+    box-sizing: border-box;
+    will-change: transform, opacity;
+
+    /* Custom Backing Panel variables controlled via JS */
+    background-color: var(--backing-color);
+    border-radius: var(--backing-radius);
+    padding: var(--backing-padding);
+    box-shadow: var(--backing-shadow);
+}
+
+#banner-image {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: var(--image-fit);
+    will-change: transform, opacity, filter;
+    
+    /* Using drop-shadow filter to wrap perfectly around PNG transparent edges */
+    filter: var(--shadow-filter); 
+}
+
+/* Base class mapped and calculated by JS controller */
+.animated {
+    animation-duration: var(--animation-duration);
+    animation-fill-mode: both;
+}
+
+/* =========================================
+   INTRO ANIMATIONS (1-13)
+========================================= */
+
+/* 1. Fade In */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.fadeIn { animation-name: fadeIn; }
+
+/* 2. Slide In Left */
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.slideInLeft { animation-name: slideInLeft; }
+
+/* 3. Slide In Right */
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.slideInRight { animation-name: slideInRight; }
+
+/* 4. Slide In Up */
+@keyframes slideInUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.slideInUp { animation-name: slideInUp; }
+
+/* 5. Slide In Down */
+@keyframes slideInDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.slideInDown { animation-name: slideInDown; }
+
+/* 6. Bounce In */
+@keyframes bounceIn {
+    from, 20%, 40%, 60%, 80%, to { animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+    0% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+    20% { transform: scale3d(1.1, 1.1, 1.1); }
+    40% { transform: scale3d(0.9, 0.9, 0.9); }
+    60% { opacity: 1; transform: scale3d(1.03, 1.03, 1.03); }
+    80% { transform: scale3d(0.97, 0.97, 0.97); }
+    to { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+.bounceIn { animation-name: bounceIn; }
+
+/* 7. Zoom In */
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+    50% { opacity: 1; }
+    to { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+.zoomIn { animation-name: zoomIn; }
+
+/* 8. Flip In X */
+@keyframes flipInX {
+    from { transform: perspective(400px) rotate3d(1, 0, 0, 90deg); animation-timing-function: ease-in; opacity: 0; }
+    40% { transform: perspective(400px) rotate3d(1, 0, 0, -20deg); animation-timing-function: ease-in; }
+    60% { transform: perspective(400px) rotate3d(1, 0, 0, 10deg); opacity: 1; }
+    80% { transform: perspective(400px) rotate3d(1, 0, 0, -5deg); }
+    to { transform: perspective(400px); opacity: 1; }
+}
+.flipInX { animation-name: flipInX; backface-visibility: visible !important; }
+
+/* 9. Flip In Y */
+@keyframes flipInY {
+    from { transform: perspective(400px) rotate3d(0, 1, 0, 90deg); animation-timing-function: ease-in; opacity: 0; }
+    40% { transform: perspective(400px) rotate3d(0, 1, 0, -20deg); animation-timing-function: ease-in; }
+    60% { transform: perspective(400px) rotate3d(0, 1, 0, 10deg); opacity: 1; }
+    80% { transform: perspective(400px) rotate3d(0, 1, 0, -5deg); }
+    to { transform: perspective(400px); opacity: 1; }
+}
+.flipInY { animation-name: flipInY; backface-visibility: visible !important; }
+
+/* 10. Blur Zoom In */
+@keyframes blurZoomIn {
+    from { filter: var(--shadow-filter) blur(20px); transform: scale(1.3); opacity: 0; }
+    to { filter: var(--shadow-filter) blur(0px); transform: scale(1); opacity: 1; }
+}
+.blurZoomIn { animation-name: blurZoomIn; }
+
+/* 11. Warp Slide Right In */
+@keyframes warpSlideRightIn {
+    from { transform: translate3d(100%, 0, 0) skewX(-30deg); opacity: 0; }
+    60% { transform: skewX(20deg); opacity: 1; }
+    80% { transform: skewX(-5deg); }
+    to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+.warpSlideRightIn { animation-name: warpSlideRightIn; animation-timing-function: ease-out; }
+
+/* 12. Warp Slide Left In */
+@keyframes warpSlideLeftIn {
+    from { transform: translate3d(-100%, 0, 0) skewX(30deg); opacity: 0; }
+    60% { transform: skewX(-20deg); opacity: 1; }
+    80% { transform: skewX(5deg); }
+    to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+.warpSlideLeftIn { animation-name: warpSlideLeftIn; animation-timing-function: ease-out; }
+
+/* 13. 3D Fold In */
+@keyframes foldIn3D {
+    from { transform: rotateY(-90deg) scale(0.95); opacity: 0; transform-origin: left center; }
+    to { transform: rotateY(0deg) scale(1); opacity: 1; transform-origin: left center; }
+}
+.foldIn3D { animation-name: foldIn3D; }
+
+
+/* =========================================
+   OUTRO ANIMATIONS (1-13)
+========================================= */
+
+/* 1. Fade Out */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+.fadeOut { animation-name: fadeOut; }
+
+/* 2. Slide Out Left */
+@keyframes slideOutLeft {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(-100%); opacity: 0; }
+}
+.slideOutLeft { animation-name: slideOutLeft; }
+
+/* 3. Slide Out Right */
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+.slideOutRight { animation-name: slideOutRight; }
+
+/* 4. Slide Out Up */
+@keyframes slideOutUp {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-100%); opacity: 0; }
+}
+.slideOutUp { animation-name: slideOutUp; }
+
+/* 5. Slide Out Down */
+@keyframes slideOutDown {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(100%); opacity: 0; }
+}
+.slideOutDown { animation-name: slideOutDown; }
+
+/* 6. Bounce Out */
+@keyframes bounceOut {
+    20% { transform: scale3d(0.9, 0.9, 0.9); }
+    50%, 55% { opacity: 1; transform: scale3d(1.1, 1.1, 1.1); }
+    to { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+}
+.bounceOut { animation-name: bounceOut; }
+
+/* 7. Zoom Out */
+@keyframes zoomOut {
+    from { opacity: 1; }
+    50% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+    to { opacity: 0; }
+}
+.zoomOut { animation-name: zoomOut; }
+
+/* 8. Flip Out X */
+@keyframes flipOutX {
+    from { transform: perspective(400px); opacity: 1; }
+    30% { transform: perspective(400px) rotate3d(1, 0, 0, -20deg); opacity: 1; }
+    to { transform: perspective(400px) rotate3d(1, 0, 0, 90deg); opacity: 0; }
+}
+.flipOutX { animation-name: flipOutX; backface-visibility: visible !important; }
+
+/* 9. Flip Out Y */
+@keyframes flipOutY {
+    from { transform: perspective(400px); opacity: 1; }
+    30% { transform: perspective(400px) rotate3d(0, 1, 0, -15deg); opacity: 1; }
+    to { transform: perspective(400px) rotate3d(0, 1, 0, 90deg); opacity: 0; }
+}
+.flipOutY { animation-name: flipOutY; backface-visibility: visible !important; }
+
+/* 10. Blur Zoom Out */
+@keyframes blurZoomOut {
+    from { filter: var(--shadow-filter) blur(0px); transform: scale(1); opacity: 1; }
+    to { filter: var(--shadow-filter) blur(15px); transform: scale(0.85); opacity: 0; }
+}
+.blurZoomOut { animation-name: blurZoomOut; }
+
+/* 11. Warp Slide Right Out (Highly animated dynamic slide out) */
+@keyframes warpSlideRightOut {
+    from { opacity: 1; transform: translate3d(0, 0, 0) skewX(0deg); }
+    30% { transform: translate3d(-5%, 0, 0) skewX(-5deg); opacity: 1; } /* Wind-up preparation movement */
+    to { transform: translate3d(80%, 0, 0) skewX(18deg); opacity: 0; }
+}
+.warpSlideRightOut { animation-name: warpSlideRightOut; animation-timing-function: ease-in; }
+
+/* 12. Warp Slide Left Out (Highly animated dynamic slide out) */
+@keyframes warpSlideLeftOut {
+    from { opacity: 1; transform: translate3d(0, 0, 0) skewX(0deg); }
+    30% { transform: translate3d(5%, 0, 0) skewX(5deg); opacity: 1; } /* Wind-up preparation movement */
+    to { transform: translate3d(-80%, 0, 0) skewX(-18deg); opacity: 0; }
+}
+.warpSlideLeftOut { animation-name: warpSlideLeftOut; animation-timing-function: ease-in; }
+
+/* 13. 3D Fold Out (Reverses the fold-in animation perfectly on left axis) */
+@keyframes foldOut3D {
+    from { transform: rotateY(0deg) scale(1); opacity: 1; transform-origin: left center; }
+    to { transform: rotateY(-90deg) scale(0.95); opacity: 0; transform-origin: left center; }
+}
+.foldOut3D { animation-name: foldOut3D; }
