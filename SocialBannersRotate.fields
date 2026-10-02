@@ -1,4 +1,101 @@
 {
+  "activationMode": {
+    "type": "dropdown",
+    "label": "Activation Mode",
+    "value": "both",
+    "options": {
+      "both": "Auto Rotate + Chat Command",
+      "auto": "Auto Rotate Only",
+      "command": "Chat Command Only"
+    }
+  },
+  "previewNext": {
+    "type": "button",
+    "label": "Preview Next Banner",
+    "value": "Preview Next"
+  },
+  "bannerTheme": {
+    "type": "dropdown",
+    "label": "Banner / Background Type (all socials)",
+    "value": "midnightGlass",
+    "options": {
+      "midnightGlass": "1. Midnight Glass (Neutral)",
+      "cleanFrost": "2. Clean Frost (Light Neutral)",
+      "platformPulse": "3. Platform Pulse (Brand Color)",
+      "neonEdge": "4. Neon Edge (Brand Accent)",
+      "softAurora": "5. Soft Aurora",
+      "spectrumRibbon": "6. Spectrum Ribbon",
+      "paperCut": "7. Paper Cut",
+      "broadcastBar": "8. Broadcast Bar",
+      "uploaded": "Use My Uploaded Banner Images"
+    }
+  },
+  "showPlatformLogos": {
+    "type": "checkbox",
+    "label": "Show Platform Logos",
+    "value": true
+  },
+  "bannerWidth": {
+    "type": "slider",
+    "label": "Generated Banner Width (px)",
+    "value": 760,
+    "min": 360,
+    "max": 1200,
+    "step": 10
+  },
+  "bannerHeight": {
+    "type": "slider",
+    "label": "Generated Banner Height (px)",
+    "value": 178,
+    "min": 110,
+    "max": 400,
+    "step": 2
+  },
+  "twitchHandle": {
+    "type": "text",
+    "label": "Twitch Channel / Handle (blank = hidden)",
+    "value": "@yourchannel"
+  },
+  "discordHandle": {
+    "type": "text",
+    "label": "Discord Server / Handle (blank = hidden)",
+    "value": ""
+  },
+  "youtubeHandle": {
+    "type": "text",
+    "label": "YouTube Channel / Handle (blank = hidden)",
+    "value": ""
+  },
+  "twitterHandle": {
+    "type": "text",
+    "label": "X / Twitter Handle (blank = hidden)",
+    "value": ""
+  },
+  "kickHandle": {
+    "type": "text",
+    "label": "Kick Channel / Handle (blank = hidden)",
+    "value": ""
+  },
+  "tiktokHandle": {
+    "type": "text",
+    "label": "TikTok Handle (blank = hidden)",
+    "value": ""
+  },
+  "patreonHandle": {
+    "type": "text",
+    "label": "Patreon Page / Handle (blank = hidden)",
+    "value": ""
+  },
+  "instagramHandle": {
+    "type": "text",
+    "label": "Instagram Handle (blank = hidden)",
+    "value": ""
+  },
+  "blueskyHandle": {
+    "type": "text",
+    "label": "Bluesky Handle (blank = hidden)",
+    "value": ""
+  },
   "chatCommand": {
     "type": "text",
     "label": "Chat Command to Trigger (leave empty to disable)",
@@ -173,15 +270,6 @@
     "max": 100,
     "step": 1
   },
-  "imageFit": {
-    "type": "dropdown",
-    "label": "Image Scaling Mode",
-    "value": "contain",
-    "options": {
-      "contain": "Contain (Keep aspect ratio)",
-      "cover": "Cover (Crop & fill area)"
-    }
-  },
   "randomizeOrder": {
     "type": "checkbox",
     "label": "Randomize Banner Order",
@@ -189,50 +277,50 @@
   },
   "image1": {
     "type": "image-input",
-    "label": "Banner 1"
+    "label": "Uploaded Banner 1 — Twitch"
   },
   "image2": {
     "type": "image-input",
-    "label": "Banner 2"
+    "label": "Uploaded Banner 2 — Discord"
   },
   "image3": {
     "type": "image-input",
-    "label": "Banner 3"
+    "label": "Uploaded Banner 3 — YouTube"
   },
   "image4": {
     "type": "image-input",
-    "label": "Banner 4"
+    "label": "Uploaded Banner 4 — X / Twitter"
   },
   "image5": {
     "type": "image-input",
-    "label": "Banner 5"
+    "label": "Uploaded Banner 5 — Kick"
   },
   "image6": {
     "type": "image-input",
-    "label": "Banner 6"
+    "label": "Uploaded Banner 6 — TikTok"
   },
   "image7": {
     "type": "image-input",
-    "label": "Banner 7"
+    "label": "Uploaded Banner 7 — Patreon"
   },
   "image8": {
     "type": "image-input",
-    "label": "Banner 8"
+    "label": "Uploaded Banner 8 — Instagram"
   },
   "image9": {
     "type": "image-input",
-    "label": "Banner 9"
+    "label": "Uploaded Banner 9 — Bluesky"
   },
   "image10": {
     "type": "image-input",
-    "label": "Banner 10"
+    "label": "Uploaded Banner 10 — Custom 10"
   },
   "image11": {
     "type": "image-input",
-    "label": "Banner 11"
+    "label": "Uploaded Banner 11 — Custom 11"
   },
   "image12": {
     "type": "image-input",
-    "label": "Banner 12"
+    "label": "Uploaded Banner 12 — Custom 12"
   }
 }
